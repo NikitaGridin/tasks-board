@@ -1,9 +1,8 @@
+import { useInvalidateUserProjects } from '@/entity/project/_queries'
 import { createProject } from '@/entity/project/project.server'
-import { useInvalidateSession, useSession } from '@/entity/user/session'
-import { routes } from '@/shared/config/routes'
+import { useSession } from '@/entity/user/session'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -13,19 +12,24 @@ const loginFormSchema = z.object({
 	}),
 })
 
-const useCreateProject = () => {
-	const { mutateAsync, isPending } = useMutation({
-		mutationFn: createProject,
-	})
-
-	return { createProject: mutateAsync, isPending }
-}
-
 export const useFormCreateProject = () => {
 	const session = useSession()
-	const invalidateSession = useInvalidateSession()
-	const router = useRouter()
-	const { createProject, isPending } = useCreateProject()
+	const invalidateUserProjects = useInvalidateUserProjects()
+	const { mutate, isPending } = useMutation({
+		mutationFn: createProject,
+		onSuccess: async (data) => {
+			if (data.error) {
+				return form.setError('root', {
+					message: data.error.message ?? 'Произошла ошибка',
+				})
+			}
+			await invalidateUserProjects() // Обновляем проекты пользователя после создания
+		},
+		onError: (error) => {
+			form.setError('root', { message: error.message ?? 'Произошла ошибка' })
+		},
+	})
+
 	const form = useForm<z.infer<typeof loginFormSchema>>({
 		resolver: zodResolver(loginFormSchema),
 		defaultValues: {
@@ -34,20 +38,11 @@ export const useFormCreateProject = () => {
 	})
 
 	async function onSubmit(values: z.infer<typeof loginFormSchema>) {
-		if (!session.data?.data) return
-		try {
-			const res = await createProject({
-				name: values.name,
-				authorId: session.data.data.id,
-			})
-			if (res.error) {
-				form.setError('root', { message: res.error.message })
-			}
-			await invalidateSession()
-			router.replace(routes.WORKSPACE)
-		} catch (error: any) {
-			form.setError('root', { message: error.message ?? 'Произошла ошибка' })
-		}
+		if (!session.data?.data) return null
+		mutate({
+			name: values.name,
+			authorId: session.data.data.id,
+		})
 	}
 
 	return {

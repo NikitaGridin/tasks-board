@@ -9,6 +9,8 @@ export function serverAction<T extends any[], U>(
 		try {
 			return { data: await fn(...args) }
 		} catch (error: unknown) {
+			console.log(error)
+
 			if (error instanceof CustomError) {
 				return new CustomError({
 					message: error.error.message,

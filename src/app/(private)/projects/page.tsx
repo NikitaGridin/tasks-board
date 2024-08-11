@@ -10,7 +10,10 @@ export const metadata: Metadata = {
 function WorkSpace() {
 	return (
 		<>
-			<Header type={'menu'} />
+			<Header
+				type={'menu'}
+				centerContent={<div className='text-2xl font-bold'>Проекты</div>}
+			/>
 			<Container>
 				<ListProjects />
 			</Container>

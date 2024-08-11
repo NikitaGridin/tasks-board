@@ -26,9 +26,8 @@ export function FormLogin() {
 					</AlertDescription>
 				</Alert>
 			)}
-			<form onSubmit={login} className='grid gap-4'>
+			<form onSubmit={login} className='grid gap-2'>
 				<FormField
-					disabled={isPending}
 					control={form.control}
 					name='phone'
 					render={({ field }) => (
@@ -37,7 +36,7 @@ export function FormLogin() {
 								<Input
 									placeholder='Номер телефона'
 									{...field}
-									className={cn('text-2xl h-16', {
+									className={cn('', {
 										'border-red-600 bg-red-50': form.formState.errors.root,
 									})}
 								/>
@@ -47,17 +46,17 @@ export function FormLogin() {
 					)}
 				/>
 				<FormField
-					disabled={isPending}
 					control={form.control}
 					name='password'
 					render={({ field }) => (
 						<FormItem>
 							<FormControl>
 								<Input
+									disabled={isPending}
 									type='password'
 									placeholder='Пароль'
 									{...field}
-									className={cn('text-2xl h-16', {
+									className={cn('', {
 										'border-red-600 bg-red-50': form.formState.errors.root,
 									})}
 								/>
@@ -66,11 +65,7 @@ export function FormLogin() {
 						</FormItem>
 					)}
 				/>
-				<Button
-					type='submit'
-					className='text-2xl h-14 font-semibold'
-					loading={isPending}
-				>
+				<Button type='submit' loading={isPending}>
 					Войти
 				</Button>
 			</form>

@@ -16,8 +16,8 @@ model User {
 
   authoredProjects Project[]     @relation("Author")
   projects         Project[]     @relation("UserProjects")
-  UserProject      UserProject[]
-  UserTasks        UserTasks[]
+  userProject      UserProject[]
+  userTasks        UserTasks[]
 }
 
 model Project {
@@ -27,7 +27,7 @@ model Project {
 
   author      User          @relation("Author", fields: [authorId], references: [id])
   members     User[]        @relation("UserProjects")
-  UserProject UserProject[]
+  userProject UserProject[]
   boards      Board[]
 }
 
@@ -36,7 +36,7 @@ model Board {
   name      String
   projectId Int
 
-  project Project  @relation(fields: [projectId], references: [id])
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   columns Column[]
 }
 
@@ -45,7 +45,7 @@ model Column {
   name    String
   boardId Int
 
-  Board Board  @relation(fields: [boardId], references: [id])
+  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
   tasks Task[]
 }
 
@@ -57,16 +57,16 @@ model Task {
   userId   Int
 
   cover     String?
-  column    Column      @relation(fields: [columnId], references: [id])
-  UserTasks UserTasks[]
+  column    Column      @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  userTasks UserTasks[]
 }
 
 model UserProject {
   userId    Int
   projectId Int
 
-  user    User    @relation(fields: [userId], references: [id])
-  project Project @relation(fields: [projectId], references: [id])
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@id([userId, projectId])
 }
@@ -75,8 +75,8 @@ model UserTasks {
   userId Int
   taskId Int
 
-  user User @relation(fields: [userId], references: [id])
-  task Task @relation(fields: [taskId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@id([userId, taskId])
 }

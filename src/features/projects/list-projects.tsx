@@ -5,6 +5,7 @@ import { routes } from '@/shared/config/routes'
 import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
 import Link from 'next/link'
+import { FormCreateProject } from './_ui/form-create-project'
 
 export const ListProjects = () => {
 	const { data, isLoading, isError } = useUserProjects()
@@ -34,24 +35,20 @@ export const ListProjects = () => {
 	}
 
 	return (
-		<div className='space-y-4'>
-			<h1 className='text-4xl font-bold'>Проекты ({data.data.length})</h1>
-			<div className='grid gap-4'>
-				{data.data.map((project) => {
-					return (
-						<Button
-							key={project.id}
-							className='text-2xl h-14 font-bold'
-							variant={'outline'}
-							asChild
-						>
-							<Link href={`${routes.PROJECT}/${project.id}`}>
-								{project.name}
-							</Link>
-						</Button>
-					)
-				})}
-			</div>
+		<div className='grid gap-4 grid-cols-2'>
+			<FormCreateProject />
+			{data.data.map((project) => {
+				return (
+					<Button
+						key={project.id}
+						className='text-xl h-24 font-bold shadow'
+						variant={'outline'}
+						asChild
+					>
+						<Link href={`${routes.PROJECT}/${project.id}`}>{project.name}</Link>
+					</Button>
+				)
+			})}
 		</div>
 	)
 }

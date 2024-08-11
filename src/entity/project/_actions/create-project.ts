@@ -16,6 +16,7 @@ export const createProject = serverAction(
 		name: string
 		authorId: number
 	}> => {
+		// Проверка наличия автора проекта
 		const author = await prisma.user.findUnique({
 			where: { id: authorId },
 		})
@@ -27,6 +28,7 @@ export const createProject = serverAction(
 			})
 		}
 
+		// Создание проекта
 		const project = await prisma.project.create({
 			data: {
 				name,
@@ -34,6 +36,36 @@ export const createProject = serverAction(
 					connect: { id: authorId },
 				},
 			},
+		})
+
+		// Создание доски для проекта
+		const board = await prisma.board.create({
+			data: {
+				project: {
+					connect: {
+						id: project.id,
+					},
+				},
+				name: 'Главная',
+			},
+		})
+
+		// Создание трех колонок: Ожидание, В работе, Готово
+		const columns = await prisma.column.createMany({
+			data: [
+				{
+					boardId: board.id,
+					name: 'Ожидание',
+				},
+				{
+					boardId: board.id,
+					name: 'В работе',
+				},
+				{
+					boardId: board.id,
+					name: 'Готово',
+				},
+			],
 		})
 
 		return {

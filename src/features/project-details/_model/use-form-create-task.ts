@@ -1,9 +1,7 @@
+import { useInvalidateTasks } from '@/entity/project/_queries'
 import { createTask } from '@/entity/task/task.server'
-import { useInvalidateSession } from '@/entity/user/session'
-import { routes } from '@/shared/config/routes'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -15,10 +13,20 @@ const loginFormSchema = z.object({
 })
 
 export const useFormCreateTask = ({ columnId }: { columnId: number }) => {
-	const invalidateSession = useInvalidateSession()
-	const router = useRouter()
-	const { mutateAsync, isPending } = useMutation({
+	const invalidateTasks = useInvalidateTasks()
+	const { mutate, isPending } = useMutation({
 		mutationFn: createTask,
+		onSuccess: async (data) => {
+			if (data.error) {
+				return form.setError('root', {
+					message: data.error.message ?? 'Произошла ошибка',
+				})
+			}
+			await invalidateTasks({ columnId })
+		},
+		onError: (error) => {
+			form.setError('root', { message: error.message ?? 'Произошла ошибка' })
+		},
 	})
 	const form = useForm<z.infer<typeof loginFormSchema>>({
 		resolver: zodResolver(loginFormSchema),
@@ -28,21 +36,12 @@ export const useFormCreateTask = ({ columnId }: { columnId: number }) => {
 		},
 	})
 
-	async function onSubmit(values: z.infer<typeof loginFormSchema>) {
-		try {
-			const res = await mutateAsync({
-				title: values.title,
-				content: values.content,
-				columnId,
-			})
-			if (res.error) {
-				form.setError('root', { message: res.error.message })
-			}
-			await invalidateSession()
-			router.replace(routes.PROJECTS)
-		} catch (error: any) {
-			form.setError('root', { message: error.message ?? 'Произошла ошибка' })
-		}
+	function onSubmit(values: z.infer<typeof loginFormSchema>) {
+		mutate({
+			title: values.title,
+			content: values.content,
+			columnId,
+		})
 	}
 
 	return {

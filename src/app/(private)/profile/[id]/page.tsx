@@ -19,7 +19,10 @@ async function ProfilePage({ params }: { params: { id: string } }) {
 
 	return (
 		<>
-			<Header type={'back'} />
+			<Header
+				type={'back'}
+				centerContent={<div className='text-2xl font-bold'>Профиль</div>}
+			/>
 			<Container>
 				<FormUpdateUser
 					id={session.data.id}

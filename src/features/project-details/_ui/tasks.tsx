@@ -39,10 +39,10 @@ export const Tasks = ({ columnId }: { columnId: number }) => {
 				return (
 					<div
 						key={task.id}
-						className='bg-white p-2 rounded-lg flex justify-between'
+						className='bg-white p-2 rounded-lg flex justify-between items-center'
 					>
 						<div className='font-semibold'>{task.title}</div>
-						<ChevronRight />
+						<ChevronRight size={18} className='text-gray-400' />
 					</div>
 				)
 			})}

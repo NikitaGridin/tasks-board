@@ -20,7 +20,7 @@ export function AvatarField({
 	if (isPending) {
 		return <FullpageSpinner />
 	}
-
+console.log(initialAvatar)
 	return (
 		<div className='relative'>
 			<Image

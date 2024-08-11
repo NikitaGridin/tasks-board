@@ -8,27 +8,15 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 const loginFormSchema = z.object({
-	phone: z.string().min(1, {
-		message: 'Обязательное поле',
-	}),
-	password: z.string().min(1, {
-		message: 'Обязательное поле',
-	}),
+	phone: z.string().min(1, { message: 'Обязательное поле' }),
+	password: z.string().min(1, { message: 'Обязательное поле' }),
 })
 
-const useLogin = () => {
-	const { mutateAsync, isPending } = useMutation({
-		mutationFn: login,
-	})
-
-	return { login: mutateAsync, isPending }
-}
-
 export const useFormLogin = () => {
-	const invalidateSession = useInvalidateSession()
 	const router = useRouter()
-	const { login, isPending } = useLogin()
-	const form = useForm<z.infer<typeof loginFormSchema>>({
+	const invalidateSession = useInvalidateSession()
+
+	const form = useForm({
 		resolver: zodResolver(loginFormSchema),
 		defaultValues: {
 			phone: '',
@@ -36,20 +24,27 @@ export const useFormLogin = () => {
 		},
 	})
 
-	async function onSubmit(values: z.infer<typeof loginFormSchema>) {
-		try {
-			const res = await login({
-				phone: values.phone,
-				password: values.password,
-			})
-			if (res.error) {
-				form.setError('root', { message: res.error.message })
+	const { mutate, isPending } = useMutation({
+		mutationFn: login,
+		onSuccess: async (data) => {
+			if (data.error) {
+				return form.setError('root', {
+					message: data.error.message ?? 'Произошла ошибка',
+				})
 			}
 			await invalidateSession()
 			router.replace(routes.PROJECTS)
-		} catch (error: any) {
+		},
+		onError: (error) => {
 			form.setError('root', { message: error.message ?? 'Произошла ошибка' })
-		}
+		},
+	})
+
+	async function onSubmit(values: z.infer<typeof loginFormSchema>) {
+		mutate({
+			phone: values.phone,
+			password: values.password,
+		})
 	}
 
 	return {

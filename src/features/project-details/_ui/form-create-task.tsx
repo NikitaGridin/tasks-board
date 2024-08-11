@@ -28,16 +28,16 @@ export function FormCreateTask({ columnId }: { columnId: number }) {
 			)}
 			<form onSubmit={createTask} className='grid gap-4'>
 				<FormField
-					disabled={isPending}
 					control={form.control}
 					name='title'
 					render={({ field }) => (
 						<FormItem>
 							<FormControl>
 								<Input
+									disabled={isPending}
 									placeholder='Название'
 									{...field}
-									className={cn('text-2xl h-16', {
+									className={cn('', {
 										'border-red-600 bg-red-50': form.formState.errors.root,
 									})}
 								/>
@@ -46,11 +46,7 @@ export function FormCreateTask({ columnId }: { columnId: number }) {
 						</FormItem>
 					)}
 				/>
-				<Button
-					type='submit'
-					className='text-2xl h-14 font-semibold'
-					loading={isPending}
-				>
+				<Button type='submit' loading={isPending}>
 					Создать
 				</Button>
 			</form>

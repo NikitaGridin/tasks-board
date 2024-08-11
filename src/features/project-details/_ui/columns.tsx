@@ -65,7 +65,7 @@ export const Columns = ({ boardId }: { boardId: number }) => {
 											<Plus />
 										</Button>
 									</DialogTrigger>
-									<DialogContent className='h-[100dvh] rounded-none border-none outline-none min-w-full'>
+									<DialogContent>
 										<DialogHeader>
 											<DialogTitle>Создание задачи</DialogTitle>
 											<DialogDescription></DialogDescription>

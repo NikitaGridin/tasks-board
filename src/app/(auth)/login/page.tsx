@@ -6,7 +6,7 @@ function LoginPage() {
 		<Container>
 			<div className='flex items-center justify-center flex-col h-[100dvh]'>
 				<div className='space-y-2 max-w-[600px] w-full'>
-					<h1 className='text-6xl font-bold'>Вход</h1>
+					<h1 className='text-4xl font-bold'>Вход</h1>
 					<FormLogin />
 				</div>
 			</div>

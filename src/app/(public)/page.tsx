@@ -1,7 +1,11 @@
 import { Container } from '@/shared/ui/container'
 
-function MainPage() {
-	return <Container>Main Page</Container>
+const MainPage = () => {
+	return (
+		<Container>
+			<div>Main Info</div>
+		</Container>
+	)
 }
 
 export default MainPage
