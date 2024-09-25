@@ -14,9 +14,11 @@ import { Plus } from 'lucide-react'
 import { useColumns } from '../_model/use-columns'
 import { FormCreateTask } from './form-create-task'
 import { Tasks } from './tasks'
+import { useDragTask } from '../_model/use-drag-task'
 
 export const Columns = ({ boardId }: { boardId: number }) => {
 	const { data, isLoading, isError } = useColumns({ boardId })
+	const {handleOnDrag,handleOnDragOver,handleOnDrop} = useDragTask()
 
 	if (isLoading) {
 		return (
@@ -52,6 +54,8 @@ export const Columns = ({ boardId }: { boardId: number }) => {
 						<div
 							key={column.id}
 							className='flex-shrink-0 w-full sm:w-[calc(50%)] lg:w-[calc(33%)] xl:w-[calc(25%)] bg-gray-100 p-4 rounded-lg h-[80vh] flex flex-col'
+							onDragOver={handleOnDragOver}
+							onDrop={handleOnDrop}
 						>
 							<div className='text-2xl font-semibold mb-2 flex justify-between'>
 								<div>{column.name}</div>
@@ -75,7 +79,7 @@ export const Columns = ({ boardId }: { boardId: number }) => {
 								</Dialog>
 							</div>
 							<div className='overflow-y-auto flex-grow space-y-2'>
-								<Tasks columnId={column.id} />
+								<Tasks columnId={column.id}/>
 							</div>
 						</div>
 					)

@@ -41,7 +41,7 @@ export const getServerSession = serverAction(
 		return {
 			id: user.id,
 			phone: user.phone,
-			avatar: `/avatars/${user.avatar}`,
+			avatar: user.avatar,
 			name: user.name,
 		}
 	}
