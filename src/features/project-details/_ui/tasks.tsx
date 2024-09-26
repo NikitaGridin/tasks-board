@@ -3,6 +3,7 @@
 import { Skeleton } from '@/shared/ui/skeleton'
 import { ChevronRight } from 'lucide-react'
 import { useTasks } from '../_model/use-tasks'
+import { useDragTask } from '../_model/use-drag-task'
 
 export const Tasks = ({ columnId }: { columnId: number }) => {
 	const { data, isLoading, isError } = useTasks({ columnId })
@@ -34,12 +35,13 @@ export const Tasks = ({ columnId }: { columnId: number }) => {
 	}
 
 	return (
-		<div className='grid gap-2'>
+		<div className='grid gap-2' >
 			{data.data.map((task) => {
 				return (
 					<div
 						key={task.id}
 						className='bg-white p-2 rounded-lg flex justify-between items-center'
+						
 					>
 						<div className='font-semibold'>{task.title}</div>
 						<ChevronRight size={18} className='text-gray-400' />

@@ -1,7 +1,7 @@
 import { FullpageSpinner } from '@/shared/ui/full-page-spinner'
-import Image from 'next/image'
 import { useRef } from 'react'
 import { useUploadAvatar } from '../_model/use-upload-avatar'
+import Image from 'next/image'
 
 export function AvatarField({
 	id,
@@ -11,6 +11,8 @@ export function AvatarField({
 	initialAvatar: string | null
 }) {
 	const { avatar, handleFileSelect, isPending } = useUploadAvatar(initialAvatar)
+	console.log('аватар', avatar )
+
 	const fileInputRef = useRef<HTMLInputElement>(null)
 
 	const handleImageClick = () => {
@@ -24,7 +26,7 @@ console.log(initialAvatar)
 	return (
 		<div className='relative'>
 			<Image
-				src={avatar ?? '/anonim.jpg'}
+				src={`/api/image?key=${avatar}`}
 				alt={''}
 				width={400}
 				height={400}

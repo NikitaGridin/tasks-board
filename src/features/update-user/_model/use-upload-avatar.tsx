@@ -8,7 +8,7 @@ export const useUploadAvatar = (initialAvatar: string | null) => {
 		mutationFn: uploadAvatar,
 		onSuccess: (data) => {
 			if (data.error) return
-			const newAvatarUrl = `/avatars/${data.data?.avatar}`
+			const newAvatarUrl = `${data.data?.avatar}`
 			setAvatar(newAvatarUrl)
 		},
 	})
