@@ -1,20 +1,32 @@
 "use client";
 
 import { Skeleton } from "@/shared/ui/skeleton";
-import { useColumns } from "../_model/use-columns";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { ColumnContainer } from "./column-container";
-import { useDragColumn } from "../_model/use-drag-column";
+import { useDragColumns } from "../_model/use-drag-column";
 import { createPortal } from "react-dom";
+import { TaskCard } from "./taskCard";
 
 export const Columns = ({ boardId }: { boardId: number }) => {
-    const { data, isLoading, isError } = useColumns({ boardId });
-    const { columns, activeColumn, onDragStart, onDragEnd } = useDragColumn({
-        data: data?.data || [],
+    const {
+        tasks,
+        tasksId,
+        columns,
+        columnsId,
+        isColumnsLoading,
+        isColumnsError,
+        activeColumn,
+        activeTask,
+        sensors,
+        onDragStart,
+        onDragEnd,
+        onDragOver,
+    } = useDragColumns({
+        boardId,
     });
 
-    if (isLoading) {
+    if (isColumnsLoading) {
         return (
             <div className="grid gap-4">
                 {Array.from({ length: 10 }).map((_, i) => {
@@ -24,32 +36,41 @@ export const Columns = ({ boardId }: { boardId: number }) => {
         );
     }
 
-    if (isError) {
+    if (isColumnsError) {
         return <div>Произошла ошибка</div>;
     }
 
-    if (!data) {
+    if (!columns) {
         return <div>Ошибка при получении данных</div>;
     }
 
-    if (data.error) {
-        return <div>{data.error.message}</div>;
-    }
+    // if (error) {
+    //     return <div>{error.message}</div>;
+    // }
 
-    if (!data.data) {
+    if (!columns) {
         return <div>Данные не получены</div>;
     }
 
     return (
-        <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
+        <DndContext
+            sensors={sensors}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            onDragOver={onDragOver}
+        >
             <div className="overflow-x-auto">
                 <div className="flex gap-4 min-w-full">
-                    <SortableContext items={columns.map((col) => col.id)}>
+                    <SortableContext items={columnsId}>
                         {columns.map((column) => {
                             return (
                                 <ColumnContainer
                                     column={column}
                                     key={column.id}
+                                    tasks={tasks.filter(
+                                        (task) => task.columnId === column.id
+                                    )}
+                                    tasksId={tasksId}
                                 />
                             );
                         })}
@@ -58,7 +79,16 @@ export const Columns = ({ boardId }: { boardId: number }) => {
             </div>
             {createPortal(
                 <DragOverlay>
-                    {activeColumn && <ColumnContainer column={activeColumn} />}
+                    {activeColumn && (
+                        <ColumnContainer
+                            column={activeColumn}
+                            tasks={tasks.filter(
+                                (task) => task.columnId === activeColumn.id
+                            )}
+                            tasksId={tasksId}
+                        />
+                    )}
+                    {activeTask && <TaskCard task={activeTask} />}
                 </DragOverlay>,
                 document.body
             )}

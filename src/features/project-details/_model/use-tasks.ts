@@ -1,8 +1,7 @@
-import { useGetTasks } from '@/entity/project/project'
+import { useGetTasks } from "@/entity/project/project";
 
-export const useTasks = ({ columnId }: { columnId: number }) => {
-	const { data, isError, isLoading } = useGetTasks({ columnId })
+export const useTasks = () => {
+    const { data, isError, isLoading } = useGetTasks();
 
-	
-	return { data, isError, isLoading}
-}
+    return { data, isError, isLoading };
+};
