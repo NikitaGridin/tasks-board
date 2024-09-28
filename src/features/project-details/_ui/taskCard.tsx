@@ -1,17 +1,33 @@
 import { Task } from "@/entity/project/_domain/types";
 import { ChevronRight } from "lucide-react";
-import { useSortableTask } from "../_model/use-sortable-task";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 export const TaskCard = ({ task }: { task: Task }) => {
-    const { setNodeRef, attributes, listeners, isDragging, style } =
-        useSortableTask({
+    const {
+        setNodeRef,
+        attributes,
+        listeners,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({
+        id: `task-${task.id}`,
+        data: {
+            type: "Task",
             task,
-        });
+        },
+    });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
 
     if (isDragging)
         return (
             <div
-                className="bg-opacity-0 border border-gray-800 p-2 rounded-lg flex w-[250px] justify-between items-center"
+                className="border border-gray-800 p-2 rounded-lg w-[250px] h-[50px] flex justify-between items-center"
                 ref={setNodeRef}
                 style={style}
             ></div>
@@ -19,7 +35,7 @@ export const TaskCard = ({ task }: { task: Task }) => {
 
     return (
         <div
-            className="bg-white p-2 rounded-lg flex w-[250px] justify-between items-center"
+            className="bg-white p-2 rounded-lg flex w-[250px] h-[50px] justify-between items-center"
             ref={setNodeRef}
             style={style}
             {...attributes}

@@ -11,21 +11,21 @@ import { useEffect, useMemo, useState } from "react";
 import { useColumns } from "./use-columns";
 import { useTasks } from "./use-tasks";
 
-export const useDragColumns = ({ boardId }: { boardId: number }) => {
+export const useDragContext = ({ boardId }: { boardId: number }) => {
     const {
         data: columnsData,
         isLoading: isColumnsLoading,
         isError: isColumnsError,
     } = useColumns({ boardId });
-    const [columns, setColumns] = useState<Column[]>(columnsData?.data || []);
+    const [columns, setColumns] = useState<Column[]>([]);
     const [activeColumn, setActiveColumn] = useState<Column | null>(null);
 
     const {
         data: tasksData,
         isLoading: isTaskLoading,
         isError: isTaskError,
-    } = useTasks();
-    const [tasks, setTasks] = useState<Task[]>(tasksData?.data || []);
+    } = useTasks({ boardId });
+    const [tasks, setTasks] = useState<Task[]>([]);
     const [activeTask, setActiveTask] = useState<Task | null>(null);
 
     const sensors = useSensors(
@@ -48,21 +48,19 @@ export const useDragColumns = ({ boardId }: { boardId: number }) => {
         }
     }, [tasksData]);
 
-    const tasksId = useMemo(() => tasks.map((task) => task.id), [tasks]);
-
     const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
 
-    function onDragStart(e: DragStartEvent) {
-        console.log("start", e);
+    const tasksId = useMemo(
+        () => tasks.map((task) => `task-${task.id}`),
+        [tasks]
+    );
 
+    function onDragStart(e: DragStartEvent) {
         if (e.active.data.current?.type === "Column") {
             setActiveColumn(e.active.data.current.column);
-            return;
         }
-
         if (e.active.data.current?.type === "Task") {
             setActiveTask(e.active.data.current.task);
-            return;
         }
     }
 
@@ -80,13 +78,11 @@ export const useDragColumns = ({ boardId }: { boardId: number }) => {
         if (activeId === overId) return;
 
         setColumns((columns) => {
-            const activeColumnIndex = columns?.findIndex(
+            const activeIndex = columns?.findIndex(
                 (col) => col.id === activeId
             );
-            const overColumnIndex = columns?.findIndex(
-                (col) => col.id === overId
-            );
-            return arrayMove(columns, activeColumnIndex, overColumnIndex);
+            const overIndex = columns?.findIndex((col) => col.id === overId);
+            return arrayMove(columns, activeIndex, overIndex);
         });
     }
 
@@ -108,10 +104,12 @@ export const useDragColumns = ({ boardId }: { boardId: number }) => {
         if (isActiveTask && isOverTask) {
             setTasks((tasks) => {
                 const activeIndex = tasks.findIndex(
-                    (task) => task.id === activeId
+                    (task) => `task-${task.id}` === activeId
                 );
 
-                const overIndex = tasks.findIndex((task) => task.id === overId);
+                const overIndex = tasks.findIndex(
+                    (task) => `task-${task.id}` === overId
+                );
 
                 tasks[activeIndex].columnId = tasks[overIndex].columnId;
 
@@ -124,9 +122,10 @@ export const useDragColumns = ({ boardId }: { boardId: number }) => {
         if (isActiveTask && isOverColumn) {
             setTasks((tasks) => {
                 const activeIndex = tasks.findIndex(
-                    (task) => task.id === activeId
+                    (task) => `task-${task.id}` === activeId
                 );
-                tasks[activeIndex].columnId = Number(overId);
+
+                tasks[activeIndex].columnId = overId as number;
 
                 return arrayMove(tasks, activeIndex, activeIndex);
             });

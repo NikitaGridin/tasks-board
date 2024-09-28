@@ -19,23 +19,21 @@ import {
 } from "@/shared/ui/form";
 import { Input } from "@/shared/ui/input";
 import { PlusCircle } from "lucide-react";
-import { useFormCreateProject } from "../_model/use-form-create-project";
+import { useFormCreateCompany } from "../model/use-form-create-company";
 
-export function FormCreateProject({ companyId }: { companyId: number }) {
-    const { createProject, form, isPending } = useFormCreateProject({
-        companyId,
-    });
+export function FormCreateCompany() {
+    const { createCompany, form, isPending } = useFormCreateCompany();
 
     return (
         <Dialog>
             <DialogTrigger asChild>
                 <Button variant={"outline"} className="h-full gap-2 shadow">
-                    <PlusCircle /> Создать проект
+                    <PlusCircle /> Создать компанию
                 </Button>
             </DialogTrigger>
             <DialogContent aria-describedby={undefined}>
                 <DialogHeader>
-                    <DialogTitle>Создайте проект</DialogTitle>
+                    <DialogTitle>Создайте компанию</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     {form.formState.errors.root && (
@@ -48,7 +46,7 @@ export function FormCreateProject({ companyId }: { companyId: number }) {
                             </AlertDescription>
                         </Alert>
                     )}
-                    <form onSubmit={createProject} className="grid gap-4">
+                    <form onSubmit={createCompany} className="grid gap-4">
                         <FormField
                             control={form.control}
                             name="name"
@@ -57,7 +55,7 @@ export function FormCreateProject({ companyId }: { companyId: number }) {
                                     <FormControl>
                                         <Input
                                             disabled={isPending}
-                                            placeholder="Название проекта"
+                                            placeholder="Название компании"
                                             {...field}
                                             className={cn("", {
                                                 "border-red-600 bg-red-50":

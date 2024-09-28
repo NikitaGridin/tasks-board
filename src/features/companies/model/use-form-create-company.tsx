@@ -1,30 +1,30 @@
-import { useInvalidateUserProjects } from "@/entity/project/_queries";
-import { createProject } from "@/entity/project/project.server";
+import { useInvalidateUserCompanies } from "@/entity/company/_queries";
+import { createCompany } from "@/entity/company/company.server";
 import { useSession } from "@/entity/user/session";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-const loginFormSchema = z.object({
+const createCompanyFormSchema = z.object({
     name: z.string().min(1, {
         message: "Обязательное поле",
     }),
 });
 
-export const useFormCreateProject = ({ companyId }: { companyId: number }) => {
+export const useFormCreateCompany = () => {
     const session = useSession();
-    const invalidateUserProjects = useInvalidateUserProjects(companyId);
+    const invalidateUserCompanies = useInvalidateUserCompanies();
 
     const { mutate, isPending } = useMutation({
-        mutationFn: createProject,
+        mutationFn: createCompany,
         onSuccess: async (data) => {
             if (data.error) {
                 return form.setError("root", {
                     message: data.error.message ?? "Произошла ошибка",
                 });
             }
-            await invalidateUserProjects();
+            await invalidateUserCompanies();
         },
         onError: (error) => {
             form.setError("root", {
@@ -33,24 +33,23 @@ export const useFormCreateProject = ({ companyId }: { companyId: number }) => {
         },
     });
 
-    const form = useForm<z.infer<typeof loginFormSchema>>({
-        resolver: zodResolver(loginFormSchema),
+    const form = useForm<z.infer<typeof createCompanyFormSchema>>({
+        resolver: zodResolver(createCompanyFormSchema),
         defaultValues: {
             name: "",
         },
     });
 
-    async function onSubmit(values: z.infer<typeof loginFormSchema>) {
+    async function onSubmit(values: z.infer<typeof createCompanyFormSchema>) {
         if (!session.data?.data) return null;
         mutate({
             name: values.name,
             authorId: session.data.data.id,
-            companyId,
         });
     }
 
     return {
-        createProject: form.handleSubmit(onSubmit),
+        createCompany: form.handleSubmit(onSubmit),
         form,
         isPending,
     };

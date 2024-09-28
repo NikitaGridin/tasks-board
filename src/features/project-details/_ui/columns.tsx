@@ -4,7 +4,7 @@ import { Skeleton } from "@/shared/ui/skeleton";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { ColumnContainer } from "./column-container";
-import { useDragColumns } from "../_model/use-drag-column";
+import { useDragContext } from "../_model/use-drag-context";
 import { createPortal } from "react-dom";
 import { TaskCard } from "./taskCard";
 
@@ -22,7 +22,7 @@ export const Columns = ({ boardId }: { boardId: number }) => {
         onDragStart,
         onDragEnd,
         onDragOver,
-    } = useDragColumns({
+    } = useDragContext({
         boardId,
     });
 
@@ -65,8 +65,9 @@ export const Columns = ({ boardId }: { boardId: number }) => {
                         {columns.map((column) => {
                             return (
                                 <ColumnContainer
-                                    column={column}
                                     key={column.id}
+                                    boardId={boardId}
+                                    column={column}
                                     tasks={tasks.filter(
                                         (task) => task.columnId === column.id
                                     )}
@@ -81,6 +82,7 @@ export const Columns = ({ boardId }: { boardId: number }) => {
                 <DragOverlay>
                     {activeColumn && (
                         <ColumnContainer
+                            boardId={boardId}
                             column={activeColumn}
                             tasks={tasks.filter(
                                 (task) => task.columnId === activeColumn.id

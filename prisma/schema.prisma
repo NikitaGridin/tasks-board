@@ -13,22 +13,39 @@ model User {
   name     String?
   password String
   avatar   String?
+  role     Role    @default(MEMBER)
 
-  authoredProjects Project[]     @relation("Author")
-  projects         Project[]     @relation("UserProjects")
-  userProject      UserProject[]
-  userTasks        UserTasks[]
+  authoredCompanies Company[]     @relation("CompanyAuthor")
+  companies         Company[]     @relation("UserCompany")
+  userCompanies     UserCompany[]
+  authoredProjects  Project[]     @relation("Author")
+  projects          Project[]     @relation("UserProjects")
+  userProject       UserProject[]
+  userTasks         UserTasks[]
 }
 
-model Project {
+model Company {
   id       Int    @id @default(autoincrement())
   name     String
   authorId Int
 
-  author      User          @relation("Author", fields: [authorId], references: [id])
-  members     User[]        @relation("UserProjects")
-  userProject UserProject[]
-  boards      Board[]
+  author      User          @relation("CompanyAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  members     User[]        @relation("UserCompany")
+  userCompany UserCompany[]
+  projects    Project[]
+}
+
+model Project {
+  id        Int    @id @default(autoincrement())
+  name      String
+  authorId  Int
+  companyId Int
+
+  author      User          @relation("Author", fields: [authorId], references: [id]) // Автор проекта
+  members     User[]        @relation("UserProjects") // Члены проекта
+  userProject UserProject[] // Связь между пользователями и проектами
+  boards      Board[] // Доски задач
+  company     Company       @relation(fields: [companyId], references: [id])
 }
 
 model Board {
@@ -36,8 +53,9 @@ model Board {
   name      String
   projectId Int
 
-  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  columns Column[]
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade) // Проект, к которому принадлежит доска
+  columns Column[] // Колонки задач
+  tasks   Task[]
 }
 
 model Column {
@@ -45,8 +63,8 @@ model Column {
   name    String
   boardId Int
 
-  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  tasks Task[]
+  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade) // Связь с доской
+  tasks Task[] // Задачи, принадлежащие колонке
 }
 
 model Task {
@@ -55,28 +73,47 @@ model Task {
   content  String?
   columnId Int
   userId   Int
+  boardId  Int
 
   cover     String?
-  column    Column      @relation(fields: [columnId], references: [id], onDelete: Cascade)
-  userTasks UserTasks[]
+  board     Board       @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  column    Column      @relation(fields: [columnId], references: [id], onDelete: Cascade) // Связь с колонкой
+  userTasks UserTasks[] // Пользователи, связанные с задачей
+}
+
+model UserCompany {
+  userId    Int
+  companyId Int
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id]) // Связь с компанией, если проект связан с ней
+
+  @@id([userId, companyId]) // Композитный ключ для связи пользователя и проекта
 }
 
 model UserProject {
   userId    Int
   projectId Int
+  companyId Int
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  @@id([userId, projectId])
+  @@id([userId, projectId]) // Композитный ключ для связи пользователя и проекта
 }
 
 model UserTasks {
   userId Int
   taskId Int
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade) // Пользователь, связанный с задачей
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade) // Задача
 
-  @@id([userId, taskId])
+  @@id([userId, taskId]) // Композитный ключ для связи пользователя и задачи
+}
+
+enum Role {
+  ADMIN
+  AUTHOR
+  MEMBER
 }

@@ -9,17 +9,19 @@ const boards = "boards";
 const columns = "columns";
 const tasks = "tasks";
 
-export function useUserProjects() {
+export function useUserProjects(companyId: number) {
     return useQuery({
-        queryKey: [userProjects],
-        queryFn: () => getUserProjects(),
+        queryKey: [userProjects, companyId],
+        queryFn: () => getUserProjects(companyId),
+        enabled: companyId !== undefined,
     });
 }
-export function useInvalidateUserProjects() {
+
+export function useInvalidateUserProjects(companyId: number) {
     const queryClient = useQueryClient();
     return () =>
         queryClient.invalidateQueries({
-            queryKey: [userProjects],
+            queryKey: ["userProjects", companyId],
         });
 }
 
@@ -36,16 +38,16 @@ export function useGetColumns({ boardId }: { boardId: number }) {
     });
 }
 
-export function useGetTasks() {
+export function useGetTasks({ boardId }: { boardId: number }) {
     return useQuery({
-        queryKey: [tasks],
-        queryFn: () => getTasks(),
+        queryKey: [tasks, boardId],
+        queryFn: () => getTasks({ boardId }),
     });
 }
-export function useInvalidateTasks() {
+export function useInvalidateTasks(boardId: number) {
     const queryClient = useQueryClient();
-    return ({ columnId }: { columnId: number }) =>
+    return () =>
         queryClient.invalidateQueries({
-            queryKey: [tasks, columnId],
+            queryKey: [tasks, boardId],
         });
 }

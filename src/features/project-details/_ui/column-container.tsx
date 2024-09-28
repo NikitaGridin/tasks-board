@@ -10,28 +10,48 @@ import {
 } from "@/shared/ui/dialog";
 import { Plus } from "lucide-react";
 import { FormCreateTask } from "./form-create-task";
-import { useSortableColumn } from "../_model/use-sortable-column";
 import { TaskCard } from "./taskCard";
-import { SortableContext } from "@dnd-kit/sortable";
+import { SortableContext, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface ColumnContainer {
     column: Column;
+    boardId: number;
     tasks: Task[];
-    tasksId: number[];
+    tasksId: string[];
 }
 
 export const ColumnContainer = ({
     column,
+    boardId,
     tasks,
     tasksId,
 }: ColumnContainer) => {
-    const { setNodeRef, attributes, listeners, isDragging, style } =
-        useSortableColumn({ column });
+    const {
+        setNodeRef,
+        setActivatorNodeRef,
+        attributes,
+        listeners,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({
+        id: column.id,
+        data: {
+            type: "Column",
+            column,
+        },
+    });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
 
     if (isDragging)
         return (
             <div
-                className="flex-shrink-0 bg-opacity-0 border border-gray-800 w-full sm:w-[calc(50%)] lg:w-[calc(33%)] xl:w-[300px] rounded-lg h-[80vh] flex flex-col"
+                className="flex-shrink-0 bg-opacity-0 border border-gray-800 w-[300px] rounded-lg h-[80vh] flex flex-col"
                 ref={setNodeRef}
                 style={style}
             ></div>
@@ -39,12 +59,12 @@ export const ColumnContainer = ({
 
     return (
         <div
-            className="flex-shrink-0 w-full sm:w-[calc(50%)] lg:w-[calc(33%)] xl:w-[300px] bg-gray-100 p-4 rounded-lg h-[80vh] flex flex-col"
+            className="flex-shrink-0  w-[300px] bg-gray-100 p-4 rounded-lg h-[80vh] flex flex-col"
             ref={setNodeRef}
             style={style}
         >
             <div className="text-2xl font-semibold mb-2 flex justify-between">
-                <div {...attributes} {...listeners}>
+                <div {...attributes} {...listeners} ref={setActivatorNodeRef}>
                     {column.name}
                 </div>
                 <Dialog>
@@ -62,7 +82,10 @@ export const ColumnContainer = ({
                             <DialogTitle>Создание задачи</DialogTitle>
                             <DialogDescription></DialogDescription>
                         </DialogHeader>
-                        <FormCreateTask columnId={column.id} />
+                        <FormCreateTask
+                            boardId={boardId}
+                            columnId={column.id}
+                        />
                     </DialogContent>
                 </Dialog>
             </div>
