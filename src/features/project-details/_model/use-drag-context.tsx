@@ -7,26 +7,36 @@ import {
     useSensors,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { useEffect, useMemo, useState } from "react";
-import { useColumns } from "./use-columns";
-import { useTasks } from "./use-tasks";
+import { useMemo, useState } from "react";
+import { useGetAllDetails } from "./use-get-all-details";
+import { useUpdateAllDetails } from "./use-update-all-details";
 
 export const useDragContext = ({ boardId }: { boardId: number }) => {
     const {
-        data: columnsData,
-        isLoading: isColumnsLoading,
-        isError: isColumnsError,
-    } = useColumns({ boardId });
-    const [columns, setColumns] = useState<Column[]>([]);
+        columns,
+        setColumns,
+        isColumnsLoading,
+        isColumnsError,
+        tasks,
+        setTasks,
+        isTaskLoading,
+        isTaskError,
+    } = useGetAllDetails({ boardId });
+
+    const { setUpdatedColumns, setUpdatedTasks } = useUpdateAllDetails({
+        boardId,
+    });
+
     const [activeColumn, setActiveColumn] = useState<Column | null>(null);
 
-    const {
-        data: tasksData,
-        isLoading: isTaskLoading,
-        isError: isTaskError,
-    } = useTasks({ boardId });
-    const [tasks, setTasks] = useState<Task[]>([]);
     const [activeTask, setActiveTask] = useState<Task | null>(null);
+
+    const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
+
+    const tasksId = useMemo(
+        () => tasks.map((task) => `task-${task.id}`),
+        [tasks]
+    );
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -34,25 +44,6 @@ export const useDragContext = ({ boardId }: { boardId: number }) => {
                 distance: 3,
             },
         })
-    );
-
-    useEffect(() => {
-        if (columnsData?.data) {
-            setColumns(columnsData.data);
-        }
-    }, [columnsData]);
-
-    useEffect(() => {
-        if (tasksData?.data) {
-            setTasks(tasksData.data);
-        }
-    }, [tasksData]);
-
-    const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
-
-    const tasksId = useMemo(
-        () => tasks.map((task) => `task-${task.id}`),
-        [tasks]
     );
 
     function onDragStart(e: DragStartEvent) {
@@ -77,13 +68,30 @@ export const useDragContext = ({ boardId }: { boardId: number }) => {
 
         if (activeId === overId) return;
 
-        setColumns((columns) => {
-            const activeIndex = columns?.findIndex(
-                (col) => col.id === activeId
-            );
-            const overIndex = columns?.findIndex((col) => col.id === overId);
-            return arrayMove(columns, activeIndex, overIndex);
-        });
+        const isActiveColumn = active.data.current?.type === "Column";
+
+        if (isActiveColumn) {
+            if (activeId === overId) return;
+
+            setColumns((columns) => {
+                const activeIndex = columns?.findIndex(
+                    (col) => col.id === activeId
+                );
+                const overIndex = columns?.findIndex(
+                    (col) => col.id === overId
+                );
+                const newColumns = arrayMove(columns, activeIndex, overIndex);
+
+                setUpdatedColumns(
+                    newColumns.map((col, index) => ({
+                        id: col.id,
+                        order: index + 1,
+                    }))
+                );
+
+                return newColumns;
+            });
+        }
     }
 
     function onDragOver(e: DragEndEvent) {
@@ -113,7 +121,17 @@ export const useDragContext = ({ boardId }: { boardId: number }) => {
 
                 tasks[activeIndex].columnId = tasks[overIndex].columnId;
 
-                return arrayMove(tasks, activeIndex, overIndex);
+                const newTasks = arrayMove(tasks, activeIndex, overIndex);
+
+                setUpdatedTasks(
+                    newTasks.map((task, index) => ({
+                        id: task.id,
+                        order: index + 1,
+                        columnId: task.columnId,
+                    }))
+                );
+
+                return newTasks;
             });
         }
 
@@ -127,7 +145,17 @@ export const useDragContext = ({ boardId }: { boardId: number }) => {
 
                 tasks[activeIndex].columnId = overId as number;
 
-                return arrayMove(tasks, activeIndex, activeIndex);
+                const newTasks = arrayMove(tasks, activeIndex, activeIndex);
+
+                setUpdatedTasks(
+                    newTasks.map((task, index) => ({
+                        id: task.id,
+                        order: index + 1,
+                        columnId: task.columnId,
+                    }))
+                );
+
+                return newTasks;
             });
         }
     }

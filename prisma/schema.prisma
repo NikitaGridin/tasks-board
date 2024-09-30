@@ -41,10 +41,10 @@ model Project {
   authorId  Int
   companyId Int
 
-  author      User          @relation("Author", fields: [authorId], references: [id]) // Автор проекта
-  members     User[]        @relation("UserProjects") // Члены проекта
-  userProject UserProject[] // Связь между пользователями и проектами
-  boards      Board[] // Доски задач
+  author      User          @relation("Author", fields: [authorId], references: [id]) 
+  members     User[]        @relation("UserProjects")
+  userProject UserProject[]
+  boards      Board[]
   company     Company       @relation(fields: [companyId], references: [id])
 }
 
@@ -53,22 +53,24 @@ model Board {
   name      String
   projectId Int
 
-  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade) // Проект, к которому принадлежит доска
-  columns Column[] // Колонки задач
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  columns Column[]
   tasks   Task[]
 }
 
 model Column {
   id      Int    @id @default(autoincrement())
+  order    Int
   name    String
   boardId Int
 
-  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade) // Связь с доской
-  tasks Task[] // Задачи, принадлежащие колонке
+  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  tasks Task[]
 }
 
 model Task {
   id       Int     @id @default(autoincrement())
+  order    Int
   title    String
   content  String?
   columnId Int
@@ -77,8 +79,8 @@ model Task {
 
   cover     String?
   board     Board       @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  column    Column      @relation(fields: [columnId], references: [id], onDelete: Cascade) // Связь с колонкой
-  userTasks UserTasks[] // Пользователи, связанные с задачей
+  column    Column      @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  userTasks UserTasks[]
 }
 
 model UserCompany {
@@ -86,9 +88,9 @@ model UserCompany {
   companyId Int
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company Company @relation(fields: [companyId], references: [id]) // Связь с компанией, если проект связан с ней
+  company Company @relation(fields: [companyId], references: [id])
 
-  @@id([userId, companyId]) // Композитный ключ для связи пользователя и проекта
+  @@id([userId, companyId])
 }
 
 model UserProject {
@@ -99,17 +101,17 @@ model UserProject {
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  @@id([userId, projectId]) // Композитный ключ для связи пользователя и проекта
+  @@id([userId, projectId])
 }
 
 model UserTasks {
   userId Int
   taskId Int
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade) // Пользователь, связанный с задачей
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade) // Задача
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
-  @@id([userId, taskId]) // Композитный ключ для связи пользователя и задачи
+  @@id([userId, taskId])
 }
 
 enum Role {

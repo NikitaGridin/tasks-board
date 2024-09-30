@@ -1,5 +1,3 @@
-export type Id = string | number;
-
 export type UserProjectsResponse = {
     id: number;
     name: string;
@@ -14,13 +12,27 @@ export type ProjectDetails = {
 
 export type Column = {
     id: number;
+    order: number;
     name: string;
     boardId: number;
 };
+
+export type UpdatedColumn = {
+    id: number;
+    order: number;
+};
+
 export type Task = {
-    id: Id;
+    id: number;
+    order: number;
     title: string;
     content: string | null;
+    columnId: number;
+};
+
+export type UpdatedTask = {
+    id: number;
+    order: number;
     columnId: number;
 };
 

@@ -74,14 +74,17 @@ export const createProject = serverAction(
                 {
                     boardId: board.id,
                     name: "Ожидание",
+                    order: 1,
                 },
                 {
                     boardId: board.id,
                     name: "В работе",
+                    order: 2,
                 },
                 {
                     boardId: board.id,
                     name: "Готово",
+                    order: 3,
                 },
             ],
         });

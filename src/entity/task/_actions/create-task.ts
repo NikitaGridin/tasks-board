@@ -22,6 +22,7 @@ export const createTask = serverAction(
         authorId: number;
         boardId: number;
         columnId: number;
+        order: number;
     }> => {
         const session = await getSessionStrictServer();
         if (session.error) {
@@ -67,11 +68,19 @@ export const createTask = serverAction(
             });
         }
 
+        const maxOrderTask = await prisma.task.findFirst({
+            where: { columnId },
+            orderBy: { order: "desc" },
+        });
+
+        const newOrder = maxOrderTask ? maxOrderTask.order + 1 : 1;
+
         const task = await prisma.task.create({
             data: {
                 title,
                 content,
                 userId: author.id,
+                order: newOrder,
                 board: {
                     connect: { id: board.id },
                 },
@@ -85,6 +94,7 @@ export const createTask = serverAction(
             id: task.id,
             name: task.title,
             authorId: task.userId,
+            order: task.order,
             columnId: task.columnId,
             boardId: task.boardId,
         };
