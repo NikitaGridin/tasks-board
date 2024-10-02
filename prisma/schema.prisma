@@ -13,22 +13,39 @@ model User {
   name     String?
   password String
   avatar   String?
+  role     Role    @default(MEMBER)
 
-  authoredProjects Project[]     @relation("Author")
-  projects         Project[]     @relation("UserProjects")
-  userProject      UserProject[]
-  userTasks        UserTasks[]
+  authoredCompanies Company[]     @relation("CompanyAuthor")
+  companies         Company[]     @relation("UserCompany")
+  userCompanies     UserCompany[]
+  authoredProjects  Project[]     @relation("Author")
+  projects          Project[]     @relation("UserProjects")
+  userProject       UserProject[]
+  userTasks         UserTasks[]
 }
 
-model Project {
+model Company {
   id       Int    @id @default(autoincrement())
   name     String
   authorId Int
 
-  author      User          @relation("Author", fields: [authorId], references: [id])
+  author      User          @relation("CompanyAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  members     User[]        @relation("UserCompany")
+  userCompany UserCompany[]
+  projects    Project[]
+}
+
+model Project {
+  id        Int    @id @default(autoincrement())
+  name      String
+  authorId  Int
+  companyId Int
+
+  author      User          @relation("Author", fields: [authorId], references: [id]) 
   members     User[]        @relation("UserProjects")
   userProject UserProject[]
   boards      Board[]
+  company     Company       @relation(fields: [companyId], references: [id])
 }
 
 model Board {
@@ -38,10 +55,12 @@ model Board {
 
   project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   columns Column[]
+  tasks   Task[]
 }
 
 model Column {
   id      Int    @id @default(autoincrement())
+  order    Int
   name    String
   boardId Int
 
@@ -51,19 +70,33 @@ model Column {
 
 model Task {
   id       Int     @id @default(autoincrement())
+  order    Int
   title    String
   content  String?
   columnId Int
   userId   Int
+  boardId  Int
 
   cover     String?
+  board     Board       @relation(fields: [boardId], references: [id], onDelete: Cascade)
   column    Column      @relation(fields: [columnId], references: [id], onDelete: Cascade)
   userTasks UserTasks[]
+}
+
+model UserCompany {
+  userId    Int
+  companyId Int
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@id([userId, companyId])
 }
 
 model UserProject {
   userId    Int
   projectId Int
+  companyId Int
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -79,4 +112,10 @@ model UserTasks {
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@id([userId, taskId])
+}
+
+enum Role {
+  ADMIN
+  AUTHOR
+  MEMBER
 }

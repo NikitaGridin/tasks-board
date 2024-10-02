@@ -4,10 +4,10 @@ import { getSessionStrictServer } from "@/entity/user/session.server";
 import { CustomError, ERROR_CODES } from "@/shared/lib/errors";
 import { prisma } from "@/shared/lib/prisma";
 import { serverAction } from "@/shared/lib/server-action";
-import { UserProjectsResponse } from "../_domain/types";
+import { UserCompaniesResponse } from "../_domain/types";
 
-export const getUserProjects = serverAction(
-    async (companyId?: number): Promise<UserProjectsResponse> => {
+export const getUserCompanies = serverAction(
+    async (): Promise<UserCompaniesResponse> => {
         const session = await getSessionStrictServer();
         if (session.error) {
             throw new CustomError({
@@ -33,9 +33,8 @@ export const getUserProjects = serverAction(
             });
         }
 
-        const projects = await prisma.project.findMany({
+        const companies = await prisma.company.findMany({
             where: {
-                companyId: companyId,
                 OR: [
                     { authorId: session.data.id },
                     { members: { some: { id: session.data.id } } },
@@ -43,6 +42,6 @@ export const getUserProjects = serverAction(
             },
         });
 
-        return projects;
+        return companies;
     }
 );

@@ -1,14 +1,14 @@
 "use client";
 
+import { useUserCompanies } from "@/entity/company/company";
 import { routes } from "@/shared/config/routes";
 import { Button } from "@/shared/ui/button";
 import { Skeleton } from "@/shared/ui/skeleton";
 import Link from "next/link";
-import { FormCreateProject } from "./_ui/form-create-project";
-import { useUserProjects } from "@/entity/project/project";
+import { FormCreateCompany } from "./ui/form-create-company";
 
-export const ListProjects = ({ companyId }: { companyId: number }) => {
-    const { data, isLoading, isError } = useUserProjects(companyId);
+export const ListCompanies = () => {
+    const { data, isLoading, isError } = useUserCompanies();
 
     if (isLoading) {
         return (
@@ -36,17 +36,17 @@ export const ListProjects = ({ companyId }: { companyId: number }) => {
 
     return (
         <div className="grid gap-4 grid-cols-2">
-            <FormCreateProject companyId={companyId} />
-            {data.data.map((project) => {
+            <FormCreateCompany />
+            {data.data.map((company) => {
                 return (
                     <Button
-                        key={project.id}
+                        key={company.id}
                         className="text-xl h-24 font-bold shadow"
                         variant={"outline"}
                         asChild
                     >
-                        <Link href={`${routes.PROJECT}/${project.id}`}>
-                            {project.name}
+                        <Link href={`${routes.COMPANY}/${company.id}`}>
+                            {company.name}
                         </Link>
                     </Button>
                 );
